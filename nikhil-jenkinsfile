@@ -1,0 +1,28 @@
+pipeline {
+    agent any 
+
+    stages {
+        stage('Build') { 
+            environment {
+                 JAVA_HOME = tool 'jdk-8u45'
+                 PATH="${JAVA_HOME}/bin:${PATH}"
+                 MAVEN_HOME = tool 'M3'
+            }
+            steps { 
+                sh '${MAVEN_HOME}/bin/mvn -U clean test cobertura:cobertura -Dmaven.test.skip=true -Dcobertura.report.format=xml' 
+            }
+        }
+        stage("sonar analysis") {
+             environment {
+                 scannerHome = tool 'SonarQubeScanner'
+                 SONAR_HOST_URL = "http://172.17.0.3:9000"
+                 SONAR_AUTH_TOKEN = "edf96590e699ec96ad23d67b212c50ee6366b0cd"
+            }
+            steps {
+               withSonarQubeEnv('SonarQube Sonar') {
+                  sh "${scannerHome}/bin/sonar-scanner  -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_AUTH_TOKEN}  -Dsonar.projectName=jenkins -Dsonar.projectVersion=2.0 -Dsonar.projectKey=sonar -Dsonar.sources=."
+               }
+            }
+        }
+    }
+}
