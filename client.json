@@ -1,0 +1,6 @@
+{
+	"advertise_addr": "172.17.0.5",
+	"retry_join": ["172.17.0.3"],
+        "encrypt": "NYUJPWHEJSx0LfRFsT6qCw==",
+	"data_dir": "/tmp/consul"
+}
