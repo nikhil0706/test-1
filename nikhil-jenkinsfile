@@ -19,9 +19,11 @@ pipeline {
                  SONAR_AUTH_TOKEN = "edf96590e699ec96ad23d67b212c50ee6366b0cd"
             }
             steps {
-               withSonarQubeEnv('SonarQube Sonar') {
                   sh "${scannerHome}/bin/sonar-scanner  -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_AUTH_TOKEN}  -Dsonar.projectName=jenkins -Dsonar.projectVersion=2.0 -Dsonar.projectKey=sonar -Dsonar.sources=."
-               }
+            }
+            def qualitygate = waitForQualityGate()
+            if (qualitygate.status != "OK") {
+                error "Pipeline aborted due to quality gate coverage failure: ${qualitygate.status}"
             }
         }
     }
