@@ -1,0 +1,513 @@
+Elastic Stack installation- RPM- RHEL-7.x
+Elasticsearch Installation – RPM in RHEL-7.x
+1.	rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+2.	create a elasticsearch.repo in /etc/yum.repos.d directory
+3.	vi elasticsearch.repo
+[elasticsearch-6.x]
+name=Elasticsearch repository for 6.x packages
+baseurl=https://artifacts.elastic.co/packages/6.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+4.	Save and quit
+5.	sudo yum install Elasticsearch-6.0.1
+6.	go to the /etc/Elasticsearch  vi jvm.options
+7.	Change the heap size to half of the total Heap
+# Xms represents the initial size of total heap space
+# Xmx represents the maximum size of total heap space
+
+-Xms4g
+-Xmx4g
+8.	############## memory Lock############
+9.	--> sudo systemctl edit elasticsearch
+10.	
+11.	it should open --> /etc/systemd/system/elasticsearch.service.d/override.conf
+12.	in this file add the following lines
+13.	[Service]
+14.	LimitMEMLOCK=infinity
+15.	and run --> sudo systemctl daemon-reload
+16.	sudo systemctl daemon-reload
+17.	sudo bin/systemctl enable elasticsearch.service
+Elasticsearch.yml
+     # ========================# Elastic Search Configuration #========================= #
+# NOTE: Elasticsearch comes with reasonable defaults for most settings.
+#       Before you set out to tweak and tune the configuration, make sure you
+#       understand what are you trying to accomplish and the consequences.
+#
+# The primary way of configuring a node is via this file. This template lists
+# the most important settings you may want to configure for a production cluster.
+#
+# Please consult the documentation for further information on configuration options:
+# https://www.elastic.co/guide/en/elasticsearch/reference/index.html
+#
+# ---------------------------------- Cluster -----------------------------------
+#
+# Use a descriptive name for your cluster:
+#
+#cluster.name: my-application
+cluster.name: logging-dev
+#
+# ------------------------------------ Node ------------------------------------
+#
+# Use a descriptive name for the node:
+#
+#node.name: node-1
+node.name: 10.228.129.72-dev-es
+#
+# Add custom attributes to the node:
+#
+#node.attr.rack: r1
+#
+# ----------------------------------- Paths ------------------------------------
+#
+# Path to directory where to store the data (separate multiple locations by comma):
+#
+path.data: /var/lib/elasticsearch
+#
+# Path to log files:
+#
+path.logs: /var/log/elasticsearch
+#
+# ----------------------------------- Memory -----------------------------------
+#
+# Lock the memory on startup:
+#
+#bootstrap.memory_lock: true
+bootstrap.memory_lock: true
+#
+# Make sure that the heap size is set to about half the memory available
+# on the system and that the owner of the process is allowed to use this
+# limit.
+#
+# Elasticsearch performs poorly when the system is swapping the memory.
+#
+# ---------------------------------- Network -----------------------------------
+#
+# Set the bind address to a specific IP (IPv4 or IPv6):
+#
+#network.host: 192.168.0.1
+network.host: 10.228.129.72
+#
+# Set a custom port for HTTP:
+#
+http.port: 9200
+#
+# For more information, consult the network module documentation.
+#
+# --------------------------------- Discovery ----------------------------------
+#
+# Pass an initial list of hosts to perform discovery when new node is started:
+# The default list of hosts is ["127.0.0.1", "[::1]"]
+#
+#discovery.zen.ping.unicast.hosts: ["host1", "host2"]
+#discovery.zen.ping.unicast.hosts: ["10.228.129.72"]
+#
+# Prevent the "split brain" by configuring the majority of nodes (total number of master-eligible nodes / 2 + 1):
+#
+#discovery.zen.minimum_master_nodes: 3
+#discovery.zen.minimum_master_nodes: 1
+#
+# For more information, consult the zen discovery module documentation.
+#
+# ---------------------------------- Gateway -----------------------------------
+#
+# Block initial recovery after a full cluster restart until N nodes are started:
+#
+#gateway.recover_after_nodes: 3
+#
+# For more information, consult the gateway module documentation.
+#
+# ---------------------------------- Various -----------------------------------
+#
+# Require explicit names when deleting indices:
+#
+#action.destructive_requires_name: true
+#
+xpack.ssl.key: /etc/elasticsearch/x-pack/10.228.129.72-dev-es/10.228.129.72-dev-es.key
+xpack.ssl.certificate: /etc/elasticsearch/x-pack/10.228.129.72-dev-es/10.228.129.72-dev-es.crt
+xpack.ssl.certificate_authorities: /etc/elasticsearch/x-pack/ca.crt
+xpack.security.transport.ssl.enabled: true
+xpack.security.http.ssl.enabled: true
+18.	Then go to the cd /usr/share/Elasticsearch/bin/x-pack  ./setup-passwords interactive
+19.	Set the passwords for the Elasticsearch, Kibana and Logstash
+20.	Start the Elasticsearch as service  Sudo systemctl start Elasticsearch.service
+21.	Status of the service  sudo systemctl status Elasticsearch.service
+22.	Stop the service  sudo systemctl stop Elasticsearch.service
+Kibana installation rpm in RHEL 7.X:
+1.	rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+2.	create a kibana.repo in /etc/yum.repos.d directory
+3.	vi kibana.repo
+[elasticsearch-6.x]
+name=Elasticsearch repository for 6.x packages
+baseurl=https://artifacts.elastic.co/packages/6.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+4.	Save and quit
+5.	sudo yum install kibana-6.0.1
+6.	Go to cd /etc/kibana
+kibana.yml
+# Kibana is served by a back end server. This setting specifies the port to use.
+server.port: 5601
+
+# Specifies the address to which the Kibana server will bind. IP addresses and host names are both valid values.
+# The default is 'localhost', which usually means remote machines will not be able to connect.
+# To allow connections from remote users, set this parameter to a non-loopback address.
+#server.host: "localhost"
+server.host: "10.228.129.72"
+
+# Enables you to specify a path to mount Kibana at if you are running behind a proxy. This only affects
+# the URLs generated by Kibana, your proxy is expected to remove the basePath value before forwarding requests
+# to Kibana. This setting cannot end in a slash.
+#server.basePath: ""
+
+# The maximum payload size in bytes for incoming server requests.
+#server.maxPayloadBytes: 1048576
+
+# The Kibana server's name.  This is used for display purposes.
+#server.name: "your-hostname"
+server.name: "10.228.129.72-dev-kibana"
+
+# The URL of the Elasticsearch instance to use for all your queries.
+#elasticsearch.url: "http://localhost:9200"
+elasticsearch.url: "https://10.228.129.72:9200"
+
+# When this setting's value is true Kibana uses the hostname specified in the server.host
+# setting. When the value of this setting is false, Kibana uses the hostname of the host
+# that connects to this Kibana instance.
+#elasticsearch.preserveHost: true
+
+# Kibana uses an index in Elasticsearch to store saved searches, visualizations and
+# dashboards. Kibana creates a new index if the index doesn't already exist.
+#kibana.index: ".kibana"
+#
+# The default application to load.
+#kibana.defaultAppId: "discover"
+#
+# If your Elasticsearch is protected with basic authentication, these settings provide
+# the username and password that the Kibana server uses to perform maintenance on the Kibana
+# index at startup. Your Kibana users still need to authenticate with Elasticsearch, which
+# is proxied through the Kibana server.
+#elasticsearch.username: "user"
+#elasticsearch.password: "pass"
+#
+elasticsearch.username: "elastic"
+elasticsearch.password: "caremark1"
+#
+# Enables SSL and paths to the PEM-format SSL certificate and SSL key files, respectively.
+# These settings enable SSL for outgoing requests from the Kibana server to the browser.
+#server.ssl.enabled: false
+#server.ssl.certificate: /path/to/your/server.crt
+#server.ssl.key: /path/to/your/server.key
+
+# Optional settings that provide the paths to the PEM-format SSL certificate and key files.
+# These files validate that your Elasticsearch backend uses the same key files.
+#elasticsearch.ssl.certificate: /path/to/your/client.crt
+#elasticsearch.ssl.key: /path/to/your/client.key
+
+# Optional setting that enables you to specify a path to the PEM file for the certificate
+# authority for your Elasticsearch instance.
+#elasticsearch.ssl.certificateAuthorities: [ "/path/to/your/CA.pem" ]
+
+# To disregard the validity of SSL certificates, change this setting's value to 'none'.
+#elasticsearch.ssl.verificationMode: full
+
+# Time in milliseconds to wait for Elasticsearch to respond to pings. Defaults to the value of
+# the elasticsearch.requestTimeout setting.
+#elasticsearch.pingTimeout: 1500
+
+# Time in milliseconds to wait for responses from the back end or Elasticsearch. This value
+# must be a positive integer.
+#elasticsearch.requestTimeout: 30000
+
+# List of Kibana client-side headers to send to Elasticsearch. To send *no* client-side
+# headers, set this value to [] (an empty list).
+#elasticsearch.requestHeadersWhitelist: [ authorization ]
+
+# Header names and values that are sent to Elasticsearch. Any custom headers cannot be overwritten
+# by client-side headers, regardless of the elasticsearch.requestHeadersWhitelist configuration.
+#elasticsearch.customHeaders: {}
+
+# Time in milliseconds for Elasticsearch to wait for responses from shards. Set to 0 to disable.
+#elasticsearch.shardTimeout: 0
+
+# Time in milliseconds to wait for Elasticsearch at Kibana startup before retrying.
+#elasticsearch.startupTimeout: 5000
+
+# Specifies the path where Kibana creates the process ID file.
+#pid.file: /var/run/kibana.pid
+
+# Enables you specify a file where Kibana stores log output.
+logging.dest: /var/log/kibana/kibana.stdout
+
+# Set the value of this setting to true to suppress all logging output.
+#logging.silent: false
+
+# Set the value of this setting to true to suppress all logging output other than error messages.
+#logging.quiet: false
+# Set the value of this setting to true to log all events, including system usage information
+# and all requests.
+#logging.verbose: false
+
+# Set the interval in milliseconds to sample system and process performance
+# metrics. Minimum is 100ms. Defaults to 5000.
+#ops.interval: 5000
+
+# The default locale. This locale can be used in certain circumstances to substitute any missing
+# translations.
+#i18n.defaultLocale: "en"
+
+server.ssl.enabled: true
+server.ssl.certificate: /etc/kibana/certs/10.228.129.72-dev-kibana/10.228.129.72-dev-kibana.crt
+server.ssl.key: /etc/kibana/certs/10.228.129.72-dev-kibana/10.228.129.72-dev-kibana.key
+elasticsearch.ssl.certificateAuthorities: [ "/etc/kibana/certs/ca.crt" ]
+7.	Sudo bin/systemctl daemon-reload
+8.	Sudo bin/systemctl enable kibana.service
+9.	Start the kibana service  Sudo systemctl start kibana.service
+10.	To check the status of the kibana service  sudo systemctl status kibana.service
+11.	To stop the kibana  sudo systemctl stop kibana.service
+
+Logstash Installation – RPM in RHEL-7.x
+1.	Go to the root and type  rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+2.	create a logstash.repo in /etc/yum.repos.d directory
+3.	vi kibana.repo
+[elasticsearch-6.x]
+name=Elasticsearch repository for 6.x packages
+baseurl=https://artifacts.elastic.co/packages/6.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+4.	Save and quit
+5.	sudo yum install logstash-6.0.1
+6.	Go to cd /etc/logstash
+Logstash.yml
+
+# Settings file in YAML
+#
+# Settings can be specified either in hierarchical form, e.g.:
+#
+#   pipeline:
+#     batch:
+#       size: 125
+#       delay: 5
+#
+# Or as flat keys:
+#
+#   pipeline.batch.size: 125
+#   pipeline.batch.delay: 5
+#
+# ------------  Node identity ------------
+#
+# Use a descriptive name for the node:
+#
+# node.name: test
+node.name: 10.228.129.72-dev-logstash
+#
+# If omitted the node name will default to the machine's host name
+#
+# ------------ Data path ------------------
+#
+# Which directory should be used by logstash and its plugins
+# for any persistent needs. Defaults to LOGSTASH_HOME/data
+#
+path.data: /var/lib/logstash
+#
+# ------------ Pipeline Settings --------------
+#
+# Set the number of workers that will, in parallel, execute the filters+outputs
+# stage of the pipeline.
+#
+# This defaults to the number of the host's CPU cores.
+#
+# pipeline.workers: 2
+#
+# How many workers should be used per output plugin instance
+#
+# pipeline.output.workers: 1
+#
+# How many events to retrieve from inputs before sending to filters+workers
+#
+# pipeline.batch.size: 125
+#
+# How long to wait before dispatching an undersized batch to filters+workers
+# Value is in milliseconds.
+#
+# pipeline.batch.delay: 5
+#
+# Force Logstash to exit during shutdown even if there are still inflight
+# events in memory. By default, logstash will refuse to quit until all
+# received events have been pushed to the outputs.
+#
+# WARNING: enabling this can lead to data loss during shutdown
+#
+# pipeline.unsafe_shutdown: false
+#
+# ------------ Pipeline Configuration Settings --------------
+#
+# Where to fetch the pipeline configuration for the main pipeline
+#
+path.config: /etc/logstash/conf.d/*.conf
+#
+# Pipeline configuration string for the main pipeline
+#
+# config.string:
+#
+# At startup, test if the configuration is valid and exit (dry run)
+#
+# config.test_and_exit: false
+#
+# Periodically check if the configuration has changed and reload the pipeline
+# This can also be triggered manually through the SIGHUP signal
+#
+# config.reload.automatic: false
+#
+# How often to check if the pipeline configuration has changed (in seconds)
+#
+# config.reload.interval: 3s
+#
+# Show fully compiled configuration as debug log message
+# NOTE: --log.level must be 'debug'
+#
+# config.debug: false
+#
+# When enabled, process escaped characters such as \n and \" in strings in the
+# pipeline configuration files.
+#
+# config.support_escapes: false
+#
+# ------------ Module Settings ---------------
+# Define modules here.  Modules definitions must be defined as an array.
+# The simple way to see this is to prepend each `name` with a `-`, and keep
+# all associated variables under the `name` they are associated with, and
+# above the next, like this:
+# modules:
+#   - name: MODULE_NAME
+#     var.PLUGINTYPE1.PLUGINNAME1.KEY1: VALUE
+#     var.PLUGINTYPE1.PLUGINNAME1.KEY2: VALUE
+#     var.PLUGINTYPE2.PLUGINNAME1.KEY1: VALUE
+#     var.PLUGINTYPE3.PLUGINNAME3.KEY1: VALUE
+#
+# Module variable names must be in the format of
+#
+# var.PLUGIN_TYPE.PLUGIN_NAME.KEY
+#
+# modules:
+#
+# ------------ Cloud Settings ---------------
+# Define Elastic Cloud settings here.
+# Format of cloud.id is a base64 value e.g. dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRub3RhcmVhbCRpZGVudGlmaWVy
+# and it may have an label prefix e.g. staging:dXMtZ...
+# This will overwrite 'var.elasticsearch.hosts' and 'var.kibana.host'
+# cloud.id: <identifier>
+#
+# Format of cloud.auth is: <user>:<pass>
+# This is optional
+# If supplied this will overwrite 'var.elasticsearch.username' and 'var.elasticsearch.password'
+# If supplied this will overwrite 'var.kibana.username' and 'var.kibana.password'
+# cloud.auth: elastic:<password>
+#
+# ------------ Queuing Settings --------------
+#
+# Internal queuing model, "memory" for legacy in-memory based queuing and
+# "persisted" for disk-based acked queueing. Defaults is memory
+#
+# queue.type: memory
+#
+# If using queue.type: persisted, the directory path where the data files will be stored.
+# Default is path.data/queue
+#
+# path.queue:
+#
+# If using queue.type: persisted, the page data files size. The queue data consists of
+# append-only data files separated into pages. Default is 250mb
+#
+# queue.page_capacity: 250mb
+#
+# If using queue.type: persisted, the maximum number of unread events in the queue.
+# Default is 0 (unlimited)
+#
+# queue.max_events: 0
+#
+# If using queue.type: persisted, the total capacity of the queue in number of bytes.
+# If you would like more unacked events to be buffered in Logstash, you can increase the
+# capacity using this setting. Please make sure your disk drive has capacity greater than
+# the size specified here. If both max_bytes and max_events are specified, Logstash will pick
+# whichever criteria is reached first
+# Default is 1024mb or 1gb
+#
+# queue.max_bytes: 1024mb
+#
+# If using queue.type: persisted, the maximum number of acked events before forcing a checkpoint
+# Default is 1024, 0 for unlimited
+#
+# queue.checkpoint.acks: 1024
+#
+# If using queue.type: persisted, the maximum number of written events before forcing a checkpoint
+# Default is 1024, 0 for unlimited
+#
+# queue.checkpoint.writes: 1024
+#
+# If using queue.type: persisted, the interval in milliseconds when a checkpoint is forced on the head page
+# Default is 1000, 0 for no periodic checkpoint.
+#
+# queue.checkpoint.interval: 1000
+#
+# ------------ Dead-Letter Queue Settings --------------
+# Flag to turn on dead-letter queue.
+#
+# dead_letter_queue.enable: false
+#
+# If using dead_letter_queue.enable: true, the maximum size of each dead letter queue. Entries
+# will be dropped if they would increase the size of the dead letter queue beyond this setting.
+# Default is 1024mb
+# dead_letter_queue.max_bytes: 1024mb
+#
+# If using dead_letter_queue.enable: true, the directory path where the data files will be stored.
+# Default is path.data/dead_letter_queue
+#
+# path.dead_letter_queue:
+#
+# ------------ Metrics Settings --------------
+#
+# Bind address for the metrics REST endpoint
+#
+# http.host: "127.0.0.1"
+http.host: "10.228.129.72"
+#
+# Bind port for the metrics REST endpoint, this option also accept a range
+# (9600-9700) and logstash will pick up the first available ports.
+#
+http.port: 9600-9700
+#
+# ------------ Debugging Settings --------------
+#
+# Options for log.level:
+#   * fatal
+#   * error
+#   * warn
+#   * info (default)
+#   * debug
+#   * trace
+#
+# log.level: info
+path.logs: /var/log/logstash
+#
+# ------------ Other Settings --------------
+#
+# Where to find custom plugins
+# path.plugins: []
+xpack.monitoring.elasticsearch.username: logstash_system
+xpack.monitoring.elasticsearch.password: 'caremark1'
+xpack.monitoring.elasticsearch.url: https://10.228.129.72:9200
+xpack.monitoring.elasticsearch.ssl.ca: /etc/logstash/ca.crt
+7.	Sudo systemctl daemon-reload
+8.	Sudo systemctl enable logstash.service
+9.	Start the logstash service  sudo systemctl start logstash.service
+10.	Status of the service  sudo systemctl status logstash.service
+11.	Stop the service  sudo systemctl stop logstash.
